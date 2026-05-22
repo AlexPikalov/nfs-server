@@ -1,5 +1,5 @@
 const net = require("node:net");
-const { parseRPC, asRPC, buildNullAcceptBody, SUCCESS_CODE } = require("./rpc");
+const { parseRPC, asRPC } = require("./rpc");
 const { handleNFSPacket } = require("./nfs-server");
 const server = net.createServer(connectionHandler);
 

@@ -3,12 +3,11 @@ const {
   SUCCESS_CODE,
   parseUtf8String,
   parseU32,
-  parseDynArray,
 } = require("./rpc");
 
-const { execOp } = require("./nfs-ops");
+const {execOp, OP_EXCHANGE_ID} = require("./nfs-ops");
 
-function handleNFSPacket(packet) {
+function handleNFSPacket(packet, key) {
   assertProg(packet.body);
   switch (packet.body.proc) {
     case PROC_NULL:
@@ -18,7 +17,7 @@ function handleNFSPacket(packet) {
       // TODO: implement authorization
       console.log("COMPOUND creds", packet.body.creds);
       console.log("COMPOUND verf", packet.body.verf);
-      return execCompound(packet.body.args);
+      return execCompound(packet.body.args, key);
     default:
       throw new Error(
         `Procedure (${packet.body.proc}) is not implemented yet.`,
@@ -34,7 +33,7 @@ function assertProg(body) {
   console.assert(body.prog === NFS_PROG_NO, `Unexpected prog ${body.prog}`);
 }
 
-function execCompound(buffer) {
+function execCompound(buffer, key) {
   let offset = 0;
   // tag
   const tagRes = parseUtf8String(buffer, offset);
@@ -58,14 +57,18 @@ function execCompound(buffer) {
     const opcode = opcodeRes[0];
     offset = opcodeRes[1];
 
-    const opExecRes = execOp(opcode, buffer, offset);
+    if (opcode === OP_EXCHANGE_ID && numberOfOps > 1) {
+      throw new Error("TODO: should return NFS4ERR_NOT_ONLY_OP");
+    }
+
+    const opExecRes = execOp(opcode, buffer, offset, key);
     offset = opExecRes[1];
     results.set(opcode, opExecRes[0]);
   }
 
   console.log("COMPOUND results:", results);
 
-  return { results };
+  return {results};
 }
 
 exports.handleNFSPacket = handleNFSPacket;

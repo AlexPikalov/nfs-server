@@ -1,4 +1,4 @@
-const { Buffer } = require("node:buffer");
+const {Buffer} = require("node:buffer");
 
 const U32_BITS = 4;
 const U64_BITS = 8;
@@ -24,7 +24,7 @@ function parseRPC(buffer) {
     "should exhaust buffer on last",
   );
 
-  return { xid, body: bodyRes[0] };
+  return {xid, body: bodyRes[0]};
 }
 
 function asRPC(xid, body) {
@@ -74,7 +74,7 @@ function parseBody(buffer, offset) {
   const bodyRes = isCall
     ? parseCallBody(buffer, offset)
     : parseReplyBody(buffer, offset);
-  return [{ isCall, body: bodyRes[0] }, bodyRes[1]];
+  return [{isCall, body: bodyRes[0]}, bodyRes[1]];
 }
 
 function parseCallBody(buffer, offset) {
@@ -102,7 +102,7 @@ function parseCallBody(buffer, offset) {
   const args = Buffer.from(buffer.subarray(offset));
 
   return [
-    { rpcVers, prog, vers, proc, creds, verf, args },
+    {rpcVers, prog, vers, proc, creds, verf, args},
     offset + args.length,
   ];
 }
@@ -132,7 +132,9 @@ const GARBAGE_ARGS_CODE = U32_BITS;
 const SYSTEM_ERR = "SYSTEM_ERR";
 const SYSTEM_ERR_CODE = 5;
 
+// TODO: move to ops/null.js
 function buildNullAcceptBody(acceptStatCode, data = Buffer.alloc(0)) {
+  console.log("NULL ACCEPT BODY");
   const dataLength = data.length;
   const noneVerifier = buildAuthNoneVerifier();
 
@@ -203,7 +205,7 @@ function parseOpaqueAuth(buffer, offset) {
 
   const body = buffer.subarray(offset, offset + bodyLength);
 
-  return [{ authFlavour, body }, offset + bodyLength];
+  return [{authFlavour, body}, offset + bodyLength];
 }
 
 function parseSwitchDiscr(buffer, offset) {
@@ -270,5 +272,6 @@ exports.parseUtf8String = parseUtf8String;
 exports.parseU32 = parseU32;
 exports.parseI32 = parseI32;
 exports.parseI64 = parseI64;
+exports.U32_BITS = U32_BITS;
 exports.parseDynArray = parseDynArray;
 exports.parseOpaque = parseOpaque;
